@@ -1,29 +1,5 @@
 #include <graph.h>
 
-///PARALLEL (only c), will be replaced with openCL
-void findMinimumEdges(struct Edge *input, struct Edge *output, int global_componentNum, int edgesNum) {
-  for (int global_i = 0; global_i < global_componentNum; ++global_i) {
-    int min = INT_MAX;
-    int minIndex = -1;
-
-    for (int j = 0; j < edgesNum; ++j) {
-      if (input[j].component1 == global_i && input[j].weight < min) {
-        min = input[j].weight;
-        minIndex = j;
-      }
-    }
-
-    if (minIndex != -1) {
-      output[global_i].vertex1 = input[minIndex].vertex1;
-      output[global_i].vertex2 = input[minIndex].vertex2;
-      output[global_i].component1 = input[minIndex].component1;
-      output[global_i].component2 = input[minIndex].component2;
-      output[global_i].weight = input[minIndex].weight;
-    }
-  }
-}
-///-------------------------
-
 Graph *createBidirectionGraph(Graph *g) {
   auto *bg = new Graph;
   bg->V = g->V;
@@ -37,7 +13,8 @@ Graph *createBidirectionGraph(Graph *g) {
   return bg;
 }
 
-std::vector<Edge> boruvka(Graph *g) {
+///Sequential boruvka
+std::vector<Edge> sequentialBoruvka(Graph *g) {
   std::vector<Edge> result = std::vector<Edge>();
   int edgesNum = g->E;
   int componentsNum = g->V;
@@ -54,6 +31,7 @@ std::vector<Edge> boruvka(Graph *g) {
   while (result.size() < g->V - 1 && edgesNum > 0) {
     auto *minEdges = new Edge[componentsNum];
 
+//    runKernel(clConfig, edges, minEdges, componentsNum, edgesNum);
     findMinimumEdges(edges, minEdges, componentsNum, edgesNum);
 
     for (int i = 0; i < componentsNum; ++i) {
@@ -85,6 +63,29 @@ std::vector<Edge> boruvka(Graph *g) {
 
   delete[] edges;
   return result;
+}
+
+///Sequential search
+void findMinimumEdges(struct Edge *input, struct Edge *output, int global_componentNum, int edgesNum) {
+  for (int global_i = 0; global_i < global_componentNum; ++global_i) {
+    int min = INT_MAX;
+    int minIndex = -1;
+
+    for (int j = 0; j < edgesNum; ++j) {
+      if (input[j].component1 == global_i && input[j].weight < min) {
+        min = input[j].weight;
+        minIndex = j;
+      }
+    }
+
+    if (minIndex != -1) {
+      output[global_i].vertex1 = input[minIndex].vertex1;
+      output[global_i].vertex2 = input[minIndex].vertex2;
+      output[global_i].component1 = input[minIndex].component1;
+      output[global_i].component2 = input[minIndex].component2;
+      output[global_i].weight = input[minIndex].weight;
+    }
+  }
 }
 
 int createComponents(std::vector<Edge> &tree, Edge *edges, int edgesNum, std::vector<Edge>& result) {

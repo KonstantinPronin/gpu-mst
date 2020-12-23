@@ -126,11 +126,11 @@ cl_program CreateProgram(cl_context context, cl_device_id device, const char* fi
 }
 
 /* Create memory objects to be used as arguments to the Kernel */
-bool CreateMemObjects(cl_context context, cl_mem memObjects[3], Edge* edges, size_t edgesNumber) {
+bool CreateMemObjects(cl_context context, cl_mem memObjects[3], Edge* edges, size_t edgesNumber, size_t vertexNumber) {
   memObjects[0] = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                  sizeof(Edge) * edgesNumber, edges, NULL);
   memObjects[1] = clCreateBuffer(context, CL_MEM_READ_WRITE,
-                                 sizeof(Edge) * edgesNumber, NULL, NULL);
+                                 sizeof(Edge) * vertexNumber, NULL, NULL);
   memObjects[2] = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                  sizeof(int) * 1, &edgesNumber, NULL);
 

@@ -16,8 +16,9 @@ struct Graph {
 };
 
 Graph* createBidirectionGraph(Graph* g);
-std::vector<Edge> boruvka(Graph *g);
+std::vector<Edge> sequentialBoruvka(Graph *g);
 int createComponents(std::vector<Edge> &tree, Edge *edges, int edgesNum, std::vector<Edge>& result);
 std::set<int> dfs(std::vector<Edge>& edges, int start);
+void findMinimumEdges(struct Edge *input, struct Edge *output, int global_componentNum, int edgesNum);
 
 #endif //GPU_MST_INCLUDE_GRAPH_H_
