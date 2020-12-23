@@ -28,7 +28,7 @@ ClConfig *initOpenCl(const char *kernelPath) {
   }
 
   // Create OpenCL Kernel
-  config->kernel = clCreateKernel(config->program, "findMinEdge", nullptr);
+  config->kernel = clCreateKernel(config->program, "findMinimumEdges", nullptr);
   if (config->kernel == nullptr) {
     std::cerr << "Failed to create Kernel" << std::endl;
     Cleanup(config->context, config->queue, config->program, config->kernel, memObjects);
@@ -57,21 +57,28 @@ void runKernel(ClConfig *config, Edge *input, Edge *output, int componentNum, in
     exit(1);
   }
 
-  size_t globalWorkSize[1] = {static_cast<size_t>(componentNum)};
+  size_t globalWorkSize[1] = {(size_t) componentNum};
   size_t localWorkSize[1] = {1};
   cl_event event;
 
   errNum = clEnqueueNDRangeKernel(config->queue, config->kernel, 1, NULL,
                                   globalWorkSize, localWorkSize,
                                   0, NULL, &event);
-
-  clFinish(config->queue);
-
   if (errNum != CL_SUCCESS) {
     std::cerr << "Error queuing Kernel for execution." << std::endl;
     Cleanup(config->context, config->queue, config->program, config->kernel, memObjects);
     exit(1);
   }
+
+//  errNum = clWaitForEvents(1, &event);
+  errNum = clFinish(config->queue);
+
+  if (errNum != CL_SUCCESS) {
+    std::cerr << "Error waiting for execution." << std::endl;
+    Cleanup(config->context, config->queue, config->program, config->kernel, memObjects);
+    exit(1);
+  }
+
 
   errNum = clEnqueueReadBuffer(config->queue, memObjects[1], CL_TRUE,
                                0, componentNum * sizeof(Edge), output,
@@ -80,6 +87,11 @@ void runKernel(ClConfig *config, Edge *input, Edge *output, int componentNum, in
     std::cerr << "Error reading result buffer." << std::endl;
     Cleanup(config->context, config->queue, config->program, config->kernel, memObjects);
     exit(1);
+  }
+
+  for (auto & memObject : memObjects) {
+    if (memObject != 0)
+      clReleaseMemObject(memObject);
   }
 }
 

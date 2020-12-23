@@ -5,10 +5,10 @@
 #include <stack>
 #include <set>
 
-struct Edge {
+typedef struct __attribute__ ((packed)) Edge {
   int vertex1, vertex2, component1, component2, weight;
   bool included;
-};
+} Edge;
 
 struct Graph {
   int V, E;

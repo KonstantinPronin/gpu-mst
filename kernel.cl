@@ -1,4 +1,4 @@
-struct Edge {
+typedef struct __attribute__ ((packed)) Edge {
   int vertex1, vertex2, component1, component2, weight;
   bool included;
 };
@@ -8,7 +8,7 @@ __kernel void findMinimumEdges(__global struct Edge *input, __global struct Edge
   int minIndex = -1;
   int global_i = get_global_id(0);
 
-  for (int j = 0; j < edgesNum; ++j) {
+  for (int j = 0; j < *edgesNum; ++j) {
     if (input[j].component1 == global_i && input[j].weight < min) {
       min = input[j].weight;
       minIndex = j;

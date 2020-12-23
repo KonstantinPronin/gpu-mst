@@ -16,3 +16,7 @@ add_executable(gpu_mst main.cpp)
 
 target_link_libraries(gpu_mst ${OPENCL_LIBRARIES})
 target_link_libraries(gpu_mst gpu_mst_lib)
+
+if(APPLE)
+    target_link_libraries(gpu_mst "-framework OpenCL")
+endif(APPLE)
